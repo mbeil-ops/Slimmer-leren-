@@ -23,12 +23,15 @@
               'excel-bg': '#f0fdfa',
             },
             animation: {
-              'color-cycle': 'color-cycle 10s ease-in-out infinite',
+              'color-cycle': 'color-cycle 20s ease-in-out infinite',
             },
             keyframes: {
               'color-cycle': {
-                '0%, 100%': { backgroundColor: '#00695c' },
-                '50%': { backgroundColor: '#004d40' },
+                '0%': { backgroundColor: '#00695c' }, // Teal
+                '25%': { backgroundColor: '#059669' }, // Emerald
+                '50%': { backgroundColor: '#2563eb' }, // Blue
+                '75%': { backgroundColor: '#7c3aed' }, // Violet
+                '100%': { backgroundColor: '#00695c' }, // Teal
               }
             }
           }
@@ -48,5 +51,6 @@
 </head>
   <body class="bg-gray-50 text-slate-800 antialiased">
     <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>
