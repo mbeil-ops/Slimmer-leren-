@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { BookOpen, Lightbulb, Download, Play, X } from 'lucide-react';
 import { STRATEGIES, SUBJECT_TIPS } from './constants';
@@ -153,12 +154,15 @@ const App: React.FC = () => {
 
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 py-8 print:hidden">
-        <div className="max-w-5xl mx-auto px-4 flex justify-center">
+        <div className="max-w-5xl mx-auto px-4 flex flex-row items-center justify-center gap-3">
+          <span className="text-slate-500 text-sm font-medium">
+            Mede mogelijk gemaakt door Thomas More
+          </span>
           <a href="https://thomasmore.be/nl" target="_blank" rel="noopener noreferrer" className="opacity-80 hover:opacity-100 transition-opacity">
             <img 
               src="https://www.thomasmore.be/themes/custom/tm_theme/logo.svg" 
               alt="Thomas More Logo" 
-              className="h-12"
+              className="h-8"
               onError={(e) => {
                 // Fallback if the logo url fails: hide the image tag to avoid broken icon
                 e.currentTarget.style.display = 'none';
