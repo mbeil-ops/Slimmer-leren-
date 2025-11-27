@@ -1,7 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
 import { BookOpen, Lightbulb, Download, Play, X } from 'lucide-react';
-import { jsPDF } from 'jspdf';
 import { STRATEGIES, SUBJECT_TIPS } from './constants';
 import { SubjectFilter } from './components/SubjectFilter';
 import { StrategyCard } from './components/StrategyCard';
@@ -25,103 +24,6 @@ const App: React.FC = () => {
     );
   }, [selectedSubject, selectedStrategyId]);
 
-  const handleDownloadPDF = () => {
-    const doc = new jsPDF();
-    let yPos = 20;
-    const pageHeight = doc.internal.pageSize.height;
-    const margin = 20;
-    const maxWidth = 170;
-
-    // Title
-    doc.setFontSize(22);
-    doc.setTextColor(0, 105, 92); // excel-dark
-    doc.text("Slim Studeren - Studiekaarten", margin, yPos);
-    yPos += 15;
-
-    STRATEGIES.forEach((strategy, index) => {
-      // Check if we need a new page
-      if (yPos > pageHeight - 60) {
-        doc.addPage();
-        yPos = 20;
-      }
-
-      // Card Container visual separation
-      doc.setDrawColor(200, 200, 200);
-      doc.line(margin, yPos, margin + maxWidth, yPos);
-      yPos += 10;
-
-      // Strategy Title
-      doc.setFontSize(16);
-      doc.setTextColor(0, 0, 0);
-      doc.setFont("helvetica", "bold");
-      doc.text(`${index + 1}. ${strategy.title}`, margin, yPos);
-      yPos += 7;
-
-      // Category
-      doc.setFontSize(10);
-      doc.setTextColor(255, 183, 77); // excel-orange
-      doc.setFont("helvetica", "bold");
-      doc.text(strategy.category.toUpperCase(), margin, yPos);
-      yPos += 8;
-
-      // Description
-      doc.setFontSize(11);
-      doc.setTextColor(60, 60, 60);
-      doc.setFont("helvetica", "normal");
-      const descLines = doc.splitTextToSize(strategy.shortDescription, maxWidth);
-      doc.text(descLines, margin, yPos);
-      yPos += (descLines.length * 6) + 5;
-
-      // How To Header
-      doc.setFontSize(12);
-      doc.setTextColor(77, 182, 172); // excel-teal
-      doc.setFont("helvetica", "bold");
-      doc.text("Hoe werkt het?", margin, yPos);
-      yPos += 6;
-
-      // How To Steps
-      doc.setFontSize(10);
-      doc.setTextColor(0, 0, 0);
-      doc.setFont("helvetica", "normal");
-      strategy.howTo.forEach((step, i) => {
-        const stepText = `${i + 1}. ${step}`;
-        const stepLines = doc.splitTextToSize(stepText, maxWidth);
-        
-        if (yPos + (stepLines.length * 5) > pageHeight - 20) {
-          doc.addPage();
-          yPos = 20;
-        }
-        
-        doc.text(stepLines, margin, yPos);
-        yPos += (stepLines.length * 5) + 2;
-      });
-      
-      yPos += 5;
-
-      // Attention (Opgelet)
-      if (strategy.attention) {
-        if (yPos + 20 > pageHeight - 20) {
-          doc.addPage();
-          yPos = 20;
-        }
-        doc.setFontSize(10);
-        doc.setTextColor(200, 50, 50); // Red-ish
-        doc.setFont("helvetica", "bold");
-        doc.text("Opgelet:", margin, yPos);
-        
-        doc.setTextColor(60, 60, 60);
-        doc.setFont("helvetica", "italic");
-        const attLines = doc.splitTextToSize(strategy.attention, maxWidth - 15);
-        doc.text(attLines, margin + 15, yPos);
-        yPos += (attLines.length * 5) + 10;
-      } else {
-        yPos += 10;
-      }
-    });
-
-    doc.save("studiekaarten.pdf");
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 font-sans flex flex-col print:bg-white">
       {/* Header */}
@@ -142,14 +44,17 @@ const App: React.FC = () => {
 
           {/* Right: Download Link */}
           <div className="flex items-center gap-4">
-            <button 
-              onClick={handleDownloadPDF}
+            <a 
+              href="./studiekaarten.pdf"
+              download="studiekaarten.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-excel-teal transition-colors cursor-pointer"
               title="Download de studiekaarten"
             >
               <Download size={20} />
               <span className="hidden sm:inline">Download de studiekaarten</span>
-            </button>
+            </a>
           </div>
         </div>
       </header>
