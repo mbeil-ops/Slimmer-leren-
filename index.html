@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fustat:wght@200..800&family=Freeman&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fustat:wght@200..800&family=Freeman&family=Beth+Ellen&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
@@ -15,36 +15,56 @@
             fontFamily: {
               sans: ['"Fustat"', 'sans-serif'],
               'freeman': ['"Freeman"', 'sans-serif'],
+              'beth-ellen': ['"Beth Ellen"', 'cursive'],
             },
             colors: {
               'excel-teal': '#4db6ac',
               'excel-dark': '#00695c',
               'excel-orange': '#ffb74d',
               'excel-bg': '#f0fdfa',
-            },
-            animation: {
-              'color-cycle': 'color-cycle 20s ease-in-out infinite',
-            },
-            keyframes: {
-              'color-cycle': {
-                '0%': { backgroundColor: '#00695c' }, // Teal
-                '25%': { backgroundColor: '#059669' }, // Emerald
-                '50%': { backgroundColor: '#2563eb' }, // Blue
-                '75%': { backgroundColor: '#7c3aed' }, // Violet
-                '100%': { backgroundColor: '#00695c' }, // Teal
-              }
             }
           }
         }
       }
     </script>
+    <style>
+      .hero-gradient {
+        /* Specifieke kleuren: #f5a137 (Oranje), #fabf68 (Licht Oranje), #38bab1 (Teal), #5ab6e3 (Licht Blauw) */
+        background: linear-gradient(90deg, #f5a137, #fabf68, #38bab1, #5ab6e3);
+        background-size: 300% 300%;
+        animation: gradient 15s ease infinite;
+      }
+
+      @keyframes gradient {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+      
+      /* Hides scrollbar for Chrome, Safari and Opera */
+      .no-scrollbar::-webkit-scrollbar {
+          display: none;
+      }
+      /* Hides scrollbar for IE, Edge and Firefox */
+      .no-scrollbar {
+          -ms-overflow-style: none;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+      }
+    </style>
   <script type="importmap">
 {
   "imports": {
     "react": "https://aistudiocdn.com/react@^19.2.0",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0",
+    "jspdf": "https://esm.sh/jspdf@2.5.1"
   }
 }
 </script>

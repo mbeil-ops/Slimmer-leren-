@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { BookOpen, Lightbulb, Download, Play, X } from 'lucide-react';
+import { jsPDF } from 'jspdf';
 import { STRATEGIES, SUBJECT_TIPS } from './constants';
 import { SubjectFilter } from './components/SubjectFilter';
 import { StrategyCard } from './components/StrategyCard';
@@ -12,7 +13,6 @@ const App: React.FC = () => {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   // Filter strategies based on whether they have generic tips or specific subject tips
-  // Ideally, all strategies are shown, but we highlight ones with specific tips if a subject is chosen
   const activeStrategy = useMemo(() => 
     STRATEGIES.find(s => s.id === selectedStrategyId), 
   [selectedStrategyId]);
@@ -24,6 +24,103 @@ const App: React.FC = () => {
       t.strategyId === selectedStrategyId
     );
   }, [selectedSubject, selectedStrategyId]);
+
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    let yPos = 20;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 20;
+    const maxWidth = 170;
+
+    // Title
+    doc.setFontSize(22);
+    doc.setTextColor(0, 105, 92); // excel-dark
+    doc.text("Slim Studeren - Studiekaarten", margin, yPos);
+    yPos += 15;
+
+    STRATEGIES.forEach((strategy, index) => {
+      // Check if we need a new page
+      if (yPos > pageHeight - 60) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      // Card Container visual separation
+      doc.setDrawColor(200, 200, 200);
+      doc.line(margin, yPos, margin + maxWidth, yPos);
+      yPos += 10;
+
+      // Strategy Title
+      doc.setFontSize(16);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont("helvetica", "bold");
+      doc.text(`${index + 1}. ${strategy.title}`, margin, yPos);
+      yPos += 7;
+
+      // Category
+      doc.setFontSize(10);
+      doc.setTextColor(255, 183, 77); // excel-orange
+      doc.setFont("helvetica", "bold");
+      doc.text(strategy.category.toUpperCase(), margin, yPos);
+      yPos += 8;
+
+      // Description
+      doc.setFontSize(11);
+      doc.setTextColor(60, 60, 60);
+      doc.setFont("helvetica", "normal");
+      const descLines = doc.splitTextToSize(strategy.shortDescription, maxWidth);
+      doc.text(descLines, margin, yPos);
+      yPos += (descLines.length * 6) + 5;
+
+      // How To Header
+      doc.setFontSize(12);
+      doc.setTextColor(77, 182, 172); // excel-teal
+      doc.setFont("helvetica", "bold");
+      doc.text("Hoe werkt het?", margin, yPos);
+      yPos += 6;
+
+      // How To Steps
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
+      doc.setFont("helvetica", "normal");
+      strategy.howTo.forEach((step, i) => {
+        const stepText = `${i + 1}. ${step}`;
+        const stepLines = doc.splitTextToSize(stepText, maxWidth);
+        
+        if (yPos + (stepLines.length * 5) > pageHeight - 20) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
+        doc.text(stepLines, margin, yPos);
+        yPos += (stepLines.length * 5) + 2;
+      });
+      
+      yPos += 5;
+
+      // Attention (Opgelet)
+      if (strategy.attention) {
+        if (yPos + 20 > pageHeight - 20) {
+          doc.addPage();
+          yPos = 20;
+        }
+        doc.setFontSize(10);
+        doc.setTextColor(200, 50, 50); // Red-ish
+        doc.setFont("helvetica", "bold");
+        doc.text("Opgelet:", margin, yPos);
+        
+        doc.setTextColor(60, 60, 60);
+        doc.setFont("helvetica", "italic");
+        const attLines = doc.splitTextToSize(strategy.attention, maxWidth - 15);
+        doc.text(attLines, margin + 15, yPos);
+        yPos += (attLines.length * 5) + 10;
+      } else {
+        yPos += 10;
+      }
+    });
+
+    doc.save("studiekaarten.pdf");
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans flex flex-col print:bg-white">
@@ -45,18 +142,14 @@ const App: React.FC = () => {
 
           {/* Right: Download Link */}
           <div className="flex items-center gap-4">
-            <a 
-              href="studiekaarten.pdf"
-              download="studiekaarten.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              type="application/pdf"
+            <button 
+              onClick={handleDownloadPDF}
               className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-excel-teal transition-colors cursor-pointer"
               title="Download de studiekaarten"
             >
               <Download size={20} />
               <span className="hidden sm:inline">Download de studiekaarten</span>
-            </a>
+            </button>
           </div>
         </div>
       </header>
@@ -65,7 +158,7 @@ const App: React.FC = () => {
       <div className={`flex-grow ${(activeStrategy || isVideoModalOpen) ? 'print:hidden' : ''}`}>
         
         {/* Hero Section */}
-        <div className="animate-color-cycle text-white py-12 px-4 print:bg-white print:text-black print:p-0 print:mb-8">
+        <div className="hero-gradient text-white py-12 px-4 print:bg-white print:text-black print:p-0 print:mb-8">
           <div className="max-w-3xl mx-auto text-center print:text-left">
             <h2 className="text-3xl md:text-5xl font-freeman mb-4 print:text-slate-900 uppercase tracking-wide">EFFECTIEF JEZELF ONTWIKKELEN</h2>
             <p className="text-excel-bg/90 text-lg mb-8 leading-relaxed max-w-2xl mx-auto print:text-slate-600 print:mb-4 lowercase font-sans">
@@ -74,8 +167,8 @@ const App: React.FC = () => {
             
             {/* Subject Filter embedded in Hero for prominence */}
             <div className="bg-white/10 p-4 rounded-2xl backdrop-blur-sm border border-white/20 print:hidden">
-              <p className="text-sm font-semibold uppercase tracking-wider text-excel-orange mb-3 font-sans">
-                Kies een vak
+              <p className="text-sm font-semibold uppercase tracking-wider text-slate-900 mb-3 font-sans">
+                Kies een vak en zie welke strategieën kunnen helpen bij het leren.
               </p>
               <SubjectFilter 
                 selectedSubject={selectedSubject} 
