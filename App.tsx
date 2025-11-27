@@ -42,18 +42,20 @@ const App: React.FC = () => {
             <span className="font-medium">Kennisclip</span>
           </button>
 
-          {/* Right: Download Link */}
+          {/* Right: Prominent Download Button */}
           <div className="flex items-center gap-4">
+            {/* VERVANG ONDERSTAANDE URL MET DE WERKELIJKE LOCATIE VAN JE PDF BESTAND INDIEN NODIG */}
             <a 
-              href="./studiekaarten.pdf"
-              download="studiekaarten.pdf"
+              href="https://thomasmore.be/sites/default/files/2023-05/Studeerkaarten%20bundel.pdf"
+              download="Studeerkaarten bundel.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-excel-teal transition-colors cursor-pointer"
-              title="Download de studiekaarten"
+              className="bg-excel-teal hover:bg-excel-dark text-white px-4 py-2 rounded-lg font-bold shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center gap-2 text-sm"
+              title="Download de studiekaarten bundel"
             >
-              <Download size={20} />
-              <span className="hidden sm:inline">Download de studiekaarten</span>
+              <Download size={18} />
+              <span className="hidden sm:inline">Download Studeerkaarten Bundel</span>
+              <span className="sm:hidden">Download</span>
             </a>
           </div>
         </div>
