@@ -10,7 +10,7 @@ export const STRATEGIES: Strategy[] = [
       'Maak kaartjes: Begrip/Vraag voorop, Definitie/Antwoord achterop.',
       'Draai het kaartje om en controleer je antwoord.',
       'Werk de stapel af tot je alles kent.',
-      'Tip: Gebruik tools zoals Quizlet of papieren kaartjes.'
+      'Tip: Gebruik tools zoals Quizlet, NotebookLM of papieren kaartjes.'
     ],
     iconName: 'Layers'
   },
@@ -162,6 +162,14 @@ export const SUBJECT_TIPS: SubjectTip[] = [
   { subject: "Engels", strategyId: "mappen", tip: "Maak een 'Plot Hill' of mindmap van literary elements (setting, point of view, context)." },
   { subject: "Engels", strategyId: "afwisselen", tip: "Grammatica: Oefen tijden (tenses) door elkaar. Vaardigheden: Wissel lezen af met luisteren (TED talk) over hetzelfde onderwerp." },
   
+  // MODERNE VREEMDE TALEN (MVT)
+  { subject: "Moderne Vreemde Talen", strategyId: "flashcards", tip: "Leer woorden en zinnen met flashcards. Dit kan digitaal, maar het liefst nog op papier." },
+  { subject: "Moderne Vreemde Talen", strategyId: "tekenen", tip: "Bij grammatica en boektoetsen kun je verbanden aangeven door deze schematisch weer te geven." },
+  { subject: "Moderne Vreemde Talen", strategyId: "uitleggen", tip: "Leg aan jezelf uit hoe je een grammaticaregel toe moet passen." },
+  { subject: "Moderne Vreemde Talen", strategyId: "voorbeelden", tip: "Bij ontleden en toepassing van naamvallen: geef zelf een voorbeeldzin waarbij je de zinsdelen aangeeft met kleuren." },
+  { subject: "Moderne Vreemde Talen", strategyId: "gespreid", tip: "Verdeel woordenlijsten in kleinere stukken en herhaal regelmatig (meerdere malen dagelijks)." },
+  { subject: "Moderne Vreemde Talen", strategyId: "afwisselen", tip: "Wissel af: schrijf woordjes, maar laat jezelf ook horen. Maak rubrieken of een verhaal met de te leren woorden." },
+
   // NATUURKUNDE
   { subject: "Natuurkunde", strategyId: "flashcards", tip: "Maak kaartjes met grootheden, eenheden en symbolen. Gebruik ze om formules te leren." },
   { subject: "Natuurkunde", strategyId: "tekenen", tip: "Maak bij elke vraag een schets van de situatie. Dit helpt je hersenen de stof te begrijpen." },

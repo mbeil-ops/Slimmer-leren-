@@ -5,6 +5,7 @@ import { STRATEGIES, SUBJECT_TIPS } from './constants';
 import { SubjectFilter } from './components/SubjectFilter';
 import { StrategyCard } from './components/StrategyCard';
 import { SubjectType } from './types';
+import jsPDF from 'jspdf';
 
 const App: React.FC = () => {
   const [selectedSubject, setSelectedSubject] = useState<SubjectType>("Algemeen");
@@ -24,6 +25,89 @@ const App: React.FC = () => {
     );
   }, [selectedSubject, selectedStrategyId]);
 
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    let yPos = 20;
+    const pageHeight = doc.internal.pageSize.height;
+    const margin = 20;
+    const contentWidth = 170;
+
+    // Helper to check page break
+    const checkPageBreak = (height: number) => {
+      if (yPos + height > pageHeight - margin) {
+        doc.addPage();
+        yPos = 20;
+      }
+    };
+
+    // Title
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.text("Slim Studeren - Studiekaarten", margin, yPos);
+    yPos += 15;
+
+    STRATEGIES.forEach((strategy, index) => {
+      checkPageBreak(60); // Estimate minimum height for a strategy block
+
+      // Strategy Title
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(16);
+      doc.setTextColor(0, 105, 92); // Excel Teal
+      doc.text(`${index + 1}. ${strategy.title}`, margin, yPos);
+      yPos += 8;
+
+      // Category
+      doc.setFont("helvetica", "italic");
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text(strategy.category, margin, yPos);
+      yPos += 8;
+
+      // Description
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.setTextColor(0, 0, 0);
+      const descLines = doc.splitTextToSize(strategy.shortDescription, contentWidth);
+      doc.text(descLines, margin, yPos);
+      yPos += (descLines.length * 6) + 4;
+
+      // How To Header
+      checkPageBreak(20);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(12);
+      doc.text("Hoe werkt het?", margin, yPos);
+      yPos += 6;
+
+      // How To Steps
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(10);
+      strategy.howTo.forEach((step, i) => {
+        const stepText = `${i + 1}. ${step}`;
+        const stepLines = doc.splitTextToSize(stepText, contentWidth);
+        checkPageBreak(stepLines.length * 5);
+        doc.text(stepLines, margin, yPos);
+        yPos += (stepLines.length * 5);
+      });
+      yPos += 4;
+
+      // Attention
+      if (strategy.attention) {
+        const attText = `Opgelet: ${strategy.attention}`;
+        const attLines = doc.splitTextToSize(attText, contentWidth);
+        checkPageBreak(attLines.length * 5 + 10);
+        
+        doc.setTextColor(200, 0, 0); // Dark Red warning
+        doc.text(attLines, margin, yPos);
+        doc.setTextColor(0, 0, 0); // Reset
+        yPos += (attLines.length * 5);
+      }
+
+      yPos += 15; // Space between strategies
+    });
+
+    doc.save("studiekaarten.pdf");
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 font-sans flex flex-col print:bg-white">
       {/* Header */}
@@ -42,7 +126,7 @@ const App: React.FC = () => {
             <span className="font-medium">Kennisclip</span>
           </button>
 
-          {/* Right: Prominent Download Button */}
+          {/* Right: Subtle Download Button */}
           <div className="flex items-center gap-4">
             {/* VERVANG ONDERSTAANDE URL MET DE WERKELIJKE LOCATIE VAN JE PDF BESTAND INDIEN NODIG */}
             <a 
@@ -50,12 +134,14 @@ const App: React.FC = () => {
               download="Studeerkaarten bundel.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-excel-teal hover:bg-excel-dark text-white px-4 py-2 rounded-lg font-bold shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5 flex items-center gap-2 text-sm"
+              className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-excel-teal transition-colors group"
               title="Download de studiekaarten bundel"
             >
-              <Download size={18} />
-              <span className="hidden sm:inline">Download Studeerkaarten Bundel</span>
-              <span className="sm:hidden">Download</span>
+              <div className="bg-excel-teal text-white rounded-full p-1.5 shadow-sm group-hover:scale-110 transition-transform">
+                <Download size={12} />
+              </div>
+              <span className="font-medium hidden sm:inline">Download Studeerkaarten Bundel</span>
+              <span className="font-medium sm:hidden">Download</span>
             </a>
           </div>
         </div>
@@ -160,7 +246,7 @@ const App: React.FC = () => {
           </span>
           <a href="https://thomasmore.be/nl" target="_blank" rel="noopener noreferrer" className="opacity-80 hover:opacity-100 transition-opacity">
             <img 
-              src="https://www.thomasmore.be/themes/custom/tm_theme/logo.svg" 
+              src="https://media.discordapp.net/attachments/1339893245229207636/1344265538260762696/Thomas_More_logo.png?ex=67c046e7&is=67bef567&hm=c7a38779907f300c3770428d009226d79de7879e8633390cc2ce4df03df8477f&=&format=webp&quality=lossless" 
               alt="Thomas More Logo" 
               className="h-8"
               onError={(e) => {
@@ -219,6 +305,23 @@ const App: React.FC = () => {
                   </ul>
                 </div>
 
+                {/* Subject Specific Tips Section */}
+                {specificTipsForSubject.length > 0 && (
+                  <div className="bg-orange-50 p-6 rounded-xl border border-orange-100 print:bg-white print:border-gray-300 break-inside-avoid">
+                    <h3 className="flex items-center gap-2 font-bold text-lg mb-4 text-slate-800">
+                      <Lightbulb size={20} className="text-excel-orange" />
+                      Tip voor {selectedSubject}
+                    </h3>
+                    <ul className="space-y-3">
+                      {specificTipsForSubject.map((tip, idx) => (
+                        <li key={idx} className="text-slate-700 leading-relaxed print:text-slate-800">
+                          • {tip.tip}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
                 {/* Attention Section (Opgelet) */}
                 {activeStrategy.attention && (
                    <div className="bg-yellow-50 p-6 rounded-xl border border-yellow-100 print:bg-white print:border-gray-300 break-inside-avoid">
@@ -242,205 +345,117 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Video Modal - Retro TV Style */}
+      {/* Video Modal - Clean Dark Retro TV Style */}
       {isVideoModalOpen && (
         <div 
           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-300 print:hidden"
           onClick={() => setIsVideoModalOpen(false)}
         >
           <style>{`
-            /* TV Set Styling */
-            .tv-set {
-              background-color: #3b2d22;
-              background-image: linear-gradient(to bottom, #4a3b32, #2a1f18);
-              padding: 30px;
-              border-radius: 30px;
+            /* 1. DE POP-UP CONTAINER */
+            .old-tv {
+              background-color: #2a2a2a; /* Dark gray body */
+              border: 15px solid #1a1a1a; /* Darker bezel */
+              border-radius: 40px; /* Retro rounded corners */
               box-shadow: 
-                0 0 0 10px #1a120d,
-                20px 20px 50px rgba(0,0,0,0.8);
+                0 0 50px rgba(0, 0, 0, 0.8), /* Depth shadow */
+                inset 0 0 20px rgba(255, 255, 255, 0.05); /* Slight inner gloss */
+              padding: 20px;
+              position: relative;
+              width: 90vw;
+              max-width: 700px;
               display: flex;
               flex-direction: column;
               align-items: center;
-              max-width: 90%;
-              width: 700px;
-              position: relative;
-              border: 4px solid #1a120d;
             }
 
-            /* Screen Container */
-            .tv-screen-container {
+            /* 2. HET SCHERM FRAME (BEZEL) */
+            .screen-frame {
               background: #000;
-              padding: 15px;
-              border-radius: 50% 50% 40% 40% / 15%;
-              box-shadow: inset 0 0 20px rgba(0,0,0,1);
-              width: 100%;
+              border: 4px solid #333; /* Inner dark border */
+              border-radius: 15px; /* Sligthly rounded inner screen */
               overflow: hidden;
               position: relative;
-            }
-
-            /* The Screen */
-            .tv-screen {
-              position: relative;
               width: 100%;
-              padding-top: 56.25%; /* 16:9 */
-              border-radius: 100px / 40px;
-              overflow: hidden;
-              box-shadow: inset 0 0 40px rgba(0,0,0,0.9);
-              background: #111;
+              /* De 16:9 aspect ratio techniek */
+              padding-bottom: 56.25%; 
+              height: 0;
+              box-shadow: inset 0 0 10px rgba(0,0,0,1); /* Depth */
             }
 
-            /* Video Wrapper */
-            .video-wrapper {
+            /* 3. DE IFRAME */
+            .old-tv iframe {
               position: absolute;
               top: 0;
               left: 0;
               width: 100%;
               height: 100%;
-              transform: scale(1.02);
-            }
-            
-            .video-wrapper iframe {
-              width: 100%;
-              height: 100%;
+              border: none;
+              /* No overlay, no filters, just clean video */
             }
 
-            /* CRT Overlay */
-            .crt-overlay {
-              position: absolute;
-              top: 0;
-              left: 0;
-              width: 100%;
-              height: 100%;
-              pointer-events: none;
-              z-index: 2;
-              background: 
-                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
-                linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-              background-size: 100% 4px, 6px 100%;
-              box-shadow: 
-                inset 0 0 80px rgba(0,0,0,0.7),
-                inset 10px 10px 20px rgba(255,255,255,0.05);
-              animation: flicker 0.15s infinite;
-              border-radius: 100px / 40px;
-            }
-
-            /* Controls */
-            .tv-controls {
+            /* 4. DETAILS (Buttons/Speaker) */
+            .tv-details {
               display: flex;
               justify-content: space-between;
               align-items: center;
               width: 100%;
-              margin-top: 20px;
-              padding: 0 20px;
+              margin-top: 15px;
+              padding: 0 10px;
             }
 
             .speaker-grill {
               flex-grow: 1;
-              height: 20px;
+              height: 12px;
               margin: 0 20px;
-              background-image: linear-gradient(90deg, #1a120d 50%, transparent 50%);
-              background-size: 8px 100%;
+              /* Simpele speaker streepjes */
+              background-image: linear-gradient(90deg, #111 50%, transparent 50%);
+              background-size: 6px 100%;
+              opacity: 0.5;
             }
 
-            .knobs {
-              display: flex;
-              gap: 15px;
-            }
-
-            .knob {
-              width: 30px;
-              height: 30px;
-              background: #1a120d;
-              border-radius: 50%;
-              box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
-              position: relative;
-            }
-            
-            .knob::after {
-              content: '';
-              position: absolute;
-              top: 5px;
-              left: 13px;
-              width: 4px;
-              height: 10px;
-              background: #555;
-            }
-
-            .power-btn {
-              background: #8b0000;
-              color: #ccAAAA;
-              border: 2px solid #500000;
-              padding: 10px 20px;
+            .power-button {
+              background: #cc3333;
+              color: white;
               font-family: monospace;
-              font-weight: bold;
+              border: none;
+              border-radius: 4px;
+              padding: 5px 15px;
               cursor: pointer;
-              box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+              font-weight: bold;
               text-transform: uppercase;
-              transition: all 0.1s;
+              font-size: 12px;
+              box-shadow: 2px 2px 0 #880000;
+              transition: transform 0.1s, box-shadow 0.1s;
             }
 
-            .power-btn:active {
-              box-shadow: inset 2px 2px 5px rgba(0,0,0,0.8);
+            .power-button:active {
               transform: translateY(2px);
-            }
-
-            .power-btn:hover {
-              background: #a00000;
-              color: #fff;
-            }
-
-            @keyframes flicker {
-              0% { opacity: 0.95; }
-              5% { opacity: 0.85; }
-              10% { opacity: 0.95; }
-              15% { opacity: 1; }
-              100% { opacity: 0.95; }
-            }
-
-            @media (max-width: 600px) {
-              .tv-set {
-                padding: 15px;
-                width: 95%;
-              }
-              .tv-controls {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 10px;
-              }
-              .speaker-grill {
-                display: none;
-              }
+              box-shadow: 0 0 0 #880000;
             }
           `}</style>
-          
+
           <div 
-            className="tv-set"
+            className="old-tv"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Screen Container */}
-            <div className="tv-screen-container">
-              <div className="tv-screen">
-                <div className="video-wrapper">
-                  <iframe 
-                    src="https://www.youtube.com/embed/3LxSjpqOu_M" 
-                    title="YouTube video player" 
-                    frameBorder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowFullScreen
-                  />
-                </div>
-                <div className="crt-overlay" />
-              </div>
+            {/* The Screen Area */}
+            <div className="screen-frame">
+              <iframe 
+                src="https://www.youtube.com/embed/3LxSjpqOu_M" 
+                title="YouTube video player" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                allowFullScreen
+              ></iframe>
             </div>
 
-            {/* Controls */}
-            <div className="tv-controls">
-              <div className="knobs">
-                <div className="knob" />
-                <div className="knob" />
-              </div>
-              <div className="speaker-grill" />
-              <button className="power-btn" onClick={() => setIsVideoModalOpen(false)}>
+            {/* Bottom Details */}
+            <div className="tv-details">
+              <div className="speaker-grill"></div>
+              <button 
+                className="power-button" 
+                onClick={() => setIsVideoModalOpen(false)}
+              >
                 UIT
               </button>
             </div>
